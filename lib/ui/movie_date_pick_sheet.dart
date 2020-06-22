@@ -1,8 +1,8 @@
-import 'dart:math' show max;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:movies/models/movie.dart';
+import 'package:movies/ui/showtime_picker.dart';
 import 'package:movies/ui/week_date_picker.dart';
 import 'package:provider/provider.dart';
 
@@ -37,9 +37,12 @@ class MovieDatePickSheet extends StatefulWidget {
   _MovieDatePickSheetState createState() => _MovieDatePickSheetState();
 }
 
-class _MovieDatePickSheetState extends State<MovieDatePickSheet> {
+class _MovieDatePickSheetState extends State<MovieDatePickSheet> with TickerProviderStateMixin {
+  AnimationController _controller;
   Movie get movie => Provider.of<Movies>(context)[widget.index];
   Movie get movieNL => Provider.of<Movies>(context, listen: false)[widget.index];
+
+  var selectedDate;
 
   get titleStyle =>
       GoogleFonts.nunito(color: Colors.black, fontSize: 18.0, fontWeight: FontWeight.bold);
@@ -47,8 +50,14 @@ class _MovieDatePickSheetState extends State<MovieDatePickSheet> {
   get descriptionStyle => GoogleFonts.nunito(color: Colors.black87, fontSize: 11.0);
 
   @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this, duration: Duration(milliseconds: 1500));
+    _controller.forward();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    var posterThumb = Image(image: movie.poster.image, width: 105, height: 140);
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.only(
@@ -70,47 +79,111 @@ class _MovieDatePickSheetState extends State<MovieDatePickSheet> {
               color: Colors.black,
               thickness: 2.0,
             ),
-            Row(
-              children: [
-                // Poster Thumbnail
-                ClipRRect(
-                  child: posterThumb,
-                  borderRadius: BorderRadius.circular(20.0),
-                ),
-                // Movie Description
-                Flexible(
-                  fit: FlexFit.loose,
-                  child: Padding(
-                    padding: EdgeInsets.only(left: 8.0),
-                    child: Column(
-                      children: <Widget>[
-                        Text(movie.name, style: titleStyle),
-                        Text.rich(
-                          TextSpan(
-                              text: '${movie.genres}    ${movie.duration}',
-                              style: descriptionStyle),
-                        ),
-                        Text('IMDb: ${movie.imdb}\n', style: descriptionStyle),
-                        Text(
-                          movie.description,
-                          style: descriptionStyle,
-                          overflow: TextOverflow.fade,
-                        ),
-                      ],
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                    ),
-                  ),
-                ),
-                // Week Date Picker
-              ],
+            Container(
+              height: 160,
+              child: AnimatedBuilder(
+                animation: _controller,
+                builder: _slidingPosterDetailsBuilder,
+              ),
             ),
+            // Week Date Picker
             WeekDatePicker(
               days: ['S', 'M', 'T', 'W', 'T', 'F', 'S'],
               dates: ['15', '16', '17', '18', '19', '20', '21'],
+              controller: _controller,
+              onSelected: (date) => setState(() => selectedDate = date),
+            ),
+            ShowtimePicker(date: selectedDate),
+            RaisedButton(
+              child: Text(
+                'TAKE SEAT',
+                style: GoogleFonts.nunito(color: Colors.white, fontWeight: FontWeight.bold),
+              ),
+              onPressed: () {},
+              color: Colors.red[700],
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24.0)),
+              padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 20.0),
             )
           ],
         ),
       ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Widget _slidingPosterDetailsBuilder(context, child) {
+    var posterThumb = Image(image: movie.poster.image, width: 105, height: 140);
+
+    var detailTween = Tween<Offset>(begin: Offset(300, 0), end: Offset.zero);
+    var curve = ElasticOutCurve(0.5);
+
+    var posterOffset = Tween<Offset>(begin: Offset(-200, 0), end: Offset.zero).animate(
+        CurvedAnimation(curve: Interval(0, 0.3, curve: Curves.easeInOutBack), parent: _controller));
+
+    var headingOffset = detailTween
+        .animate(CurvedAnimation(curve: Interval(0.2, 0.6, curve: curve), parent: _controller));
+
+    var detailOffset = detailTween
+        .animate(CurvedAnimation(curve: Interval(0.24, 0.64, curve: curve), parent: _controller));
+
+    var detail2Offset = detailTween
+        .animate(CurvedAnimation(curve: Interval(0.28, 0.68, curve: curve), parent: _controller));
+
+    var descriptionOffset = detailTween
+        .animate(CurvedAnimation(curve: Interval(0.32, 0.72, curve: curve), parent: _controller));
+
+    return Stack(
+      children: <Widget>[
+        Positioned(
+          right: 0,
+          child: Container(
+            width: MediaQuery.of(context).size.width - 180,
+            padding: EdgeInsets.only(left: 8.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Transform.translate(
+                  offset: headingOffset.value,
+                  child: Text(movie.name, style: titleStyle),
+                ),
+                Transform.translate(
+                  offset: detailOffset.value,
+                  child: Text.rich(
+                    TextSpan(text: '${movie.genres}    ${movie.duration}', style: descriptionStyle),
+                  ),
+                ),
+                Transform.translate(
+                    offset: detail2Offset.value,
+                    child: Text('IMDb: ${movie.imdb}\n', style: descriptionStyle)),
+                Transform.translate(
+                  offset: descriptionOffset.value,
+                  child: Text(
+                    movie.description,
+                    style: descriptionStyle,
+                    overflow: TextOverflow.fade,
+                  ),
+                ),
+              ],
+              crossAxisAlignment: CrossAxisAlignment.start,
+            ),
+          ),
+        ),
+        Positioned(
+          left: 0,
+          child: Transform.translate(
+            offset: posterOffset.value,
+            child: ClipRRect(
+              child: posterThumb,
+              borderRadius: BorderRadius.circular(20.0),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
