@@ -34,12 +34,8 @@ class Movies extends ChangeNotifier with ListMixin<Movie> {
 }
 
 class Movie extends ChangeNotifier {
-  Movie(
-    this._name,
-    _posterUrl,
-    _logoUrl,
-    this._blurHash,
-  ) {
+  Movie(this._name, this._description, this._genres, this._duration, this._imdb, _posterUrl,
+      _logoUrl, this._blurHash) {
     if (_posterUrl != null) {
       this._posterImage = Image.asset(
         _posterUrl,
@@ -61,7 +57,9 @@ class Movie extends ChangeNotifier {
     }
   }
 
-  String _name;
+  String _name, _duration, _description;
+  List<String> _genres;
+  double _imdb;
   Image _posterImage;
   Image _logoImage;
   String _blurHash;
@@ -70,6 +68,8 @@ class Movie extends ChangeNotifier {
   BlurHashImage get blurHashImage => _blurHashImage;
 
   String get name => _name;
+
+  get duration => _duration;
 
   set name(String value) {
     _name = value;
@@ -81,6 +81,12 @@ class Movie extends ChangeNotifier {
   Image get logo => _logoImage;
 
   String get blurHash => _blurHash;
+
+  String get description => _description;
+
+  String get imdb => _imdb.toStringAsFixed(2);
+
+  String get genres => _genres.reduce((value, element) => '$value | $element');
 
   set blurHash(String value) {
     _blurHash = value;

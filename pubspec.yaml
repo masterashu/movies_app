@@ -26,6 +26,7 @@ dependencies:
 
   provider:
   octo_image: ^0.2.1
+  google_fonts:
   cupertino_icons: ^0.1.3
 
 dev_dependencies:

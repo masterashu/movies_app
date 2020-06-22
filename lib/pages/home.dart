@@ -1,6 +1,7 @@
 import 'dart:math' show pi;
 
 import 'package:flutter/material.dart';
+import 'package:movies/ui/movie_date_pick_sheet.dart';
 import 'package:provider/provider.dart';
 import 'package:movies/models/movie.dart';
 import 'package:movies/ui/page_notifier_view.dart';
@@ -23,7 +24,9 @@ class _HomePageState extends State<HomePage> {
   PageController _controller;
   ValueNotifier<double> _notifier;
   ValueNotifier<int> _backgroundNotifier;
+
   Movies get movies => Provider.of<Movies>(context);
+
   Movies get moviesNL => Provider.of<Movies>(context, listen: false);
 
   _preloadImages() {
@@ -83,10 +86,17 @@ class _HomePageState extends State<HomePage> {
                   var scale = 1.0;
                   var img = moviesNL[value.floor()].logo;
                   if (value.ceil() < moviesNL.length && value.remainder(1.0) > 0.5) {
-                    scale = value.remainder(1.0);
+                    if (value.remainder(1.0) < 0.95) {
+                      scale = value.remainder(1.0) * 1.1;
+                    } else {
+                      scale = (2 - value.remainder(1.0));
+                    }
                     img = moviesNL[value.ceil()].logo;
                   } else if (value.floor() >= 0 && value.remainder(1.0) <= 0.5) {
-                    scale = (1 - value.remainder(1.0));
+                    if (value.remainder(1.0) > 0.05)
+                      scale = (1 - value.remainder(1.0)) * 1.1;
+                    else
+                      scale = (1 + value.remainder(1.0) * 1.1);
                   } else {
                     scale = (value.remainder(1.0) - 0.5).abs() + 0.5;
                   }
@@ -138,12 +148,18 @@ class _MoviePosterState extends State<MoviePoster> with TickerProviderStateMixin
       width: MediaQuery.of(context).size.width,
       child: Center(
         child: Selector<Movies, Movie>(
-            selector: (context, movies) => movies[widget.index],
-            builder: (context, value, child) {
+            shouldRebuild: (movie1, movie2) => !(movie1 == movie2),
+            selector: (context, Movies movies) => movies[widget.index],
+            builder: (context, Movie value, child) {
               return AnimatedBuilder(
-                child: ClipRRect(borderRadius: BorderRadius.circular(40.0), child: value.poster),
                 animation: widget._controller,
                 builder: _rotatedImageBuilder,
+                child: GestureDetector(
+                  onTap: () {
+                    MovieDatePickSheet.show(context, widget.index);
+                  },
+                  child: ClipRRect(borderRadius: BorderRadius.circular(40.0), child: value.poster),
+                ),
               );
             }),
       ),
