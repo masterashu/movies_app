@@ -34,8 +34,8 @@ class Movies extends ChangeNotifier with ListMixin<Movie> {
 }
 
 class Movie extends ChangeNotifier {
-  Movie(this._name, this._description, this._genres, this._duration, this._imdb, _posterUrl,
-      _logoUrl, this._blurHash) {
+  Movie(this._name, this._description, this._genres, this._duration, this._imdb,
+      _posterUrl, _logoUrl, this._blurHash) {
     if (_posterUrl != null) {
       this._posterImage = Image.asset(
         _posterUrl,

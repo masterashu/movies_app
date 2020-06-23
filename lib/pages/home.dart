@@ -39,13 +39,16 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    _controller = PageController(initialPage: 0, keepPage: true, viewportFraction: 0.9);
+    _controller =
+        PageController(initialPage: 0, keepPage: true, viewportFraction: 0.9);
     _notifier = ValueNotifier<double>(0.0);
     _backgroundNotifier = ValueNotifier<int>(0);
     _notifier.addListener(() {
-      if (_notifier.value.ceil() < moviesNL.length && _notifier.value.remainder(1.0) > 0.6) {
+      if (_notifier.value.ceil() < moviesNL.length &&
+          _notifier.value.remainder(1.0) > 0.6) {
         _backgroundNotifier.value = _notifier.value.ceil();
-      } else if (_notifier.value.floor() >= 0 && _notifier.value.remainder(1.0) < 0.4) {
+      } else if (_notifier.value.floor() >= 0 &&
+          _notifier.value.remainder(1.0) < 0.4) {
         _backgroundNotifier.value = _notifier.value.floor();
       }
     });
@@ -85,14 +88,16 @@ class _HomePageState extends State<HomePage> {
                 builder: (context, value, child) {
                   var scale = 1.0;
                   var img = moviesNL[value.floor()].logo;
-                  if (value.ceil() < moviesNL.length && value.remainder(1.0) > 0.5) {
+                  if (value.ceil() < moviesNL.length &&
+                      value.remainder(1.0) > 0.5) {
                     if (value.remainder(1.0) < 0.95) {
                       scale = value.remainder(1.0) * 1.1;
                     } else {
                       scale = (2 - value.remainder(1.0));
                     }
                     img = moviesNL[value.ceil()].logo;
-                  } else if (value.floor() >= 0 && value.remainder(1.0) <= 0.5) {
+                  } else if (value.floor() >= 0 &&
+                      value.remainder(1.0) <= 0.5) {
                     if (value.remainder(1.0) > 0.05)
                       scale = (1 - value.remainder(1.0)) * 1.1;
                     else
@@ -115,7 +120,10 @@ class _HomePageState extends State<HomePage> {
               scrollDirection: Axis.horizontal,
               controller: _controller,
               physics: BouncingScrollPhysics(),
-              children: [for (var i = 0; i < movies.length; i++) MoviePoster(i, _notifier)],
+              children: [
+                for (var i = 0; i < movies.length; i++)
+                  MoviePoster(i, _notifier)
+              ],
             ),
           ],
         ),
@@ -141,7 +149,8 @@ class MoviePoster extends StatefulWidget {
   _MoviePosterState createState() => _MoviePosterState();
 }
 
-class _MoviePosterState extends State<MoviePoster> with TickerProviderStateMixin {
+class _MoviePosterState extends State<MoviePoster>
+    with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -158,7 +167,9 @@ class _MoviePosterState extends State<MoviePoster> with TickerProviderStateMixin
                   onTap: () {
                     MovieDateTimePickSheet.show(context, widget.index);
                   },
-                  child: ClipRRect(borderRadius: BorderRadius.circular(40.0), child: value.poster),
+                  child: ClipRRect(
+                      borderRadius: BorderRadius.circular(40.0),
+                      child: value.poster),
                 ),
               );
             }),

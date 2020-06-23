@@ -33,7 +33,8 @@ class AnimatedMapChildBuilder extends AnimatedWidget {
         assert(builder != null),
         super(key: key, listenable: animation);
 
-  final Widget Function(BuildContext context, Map<String, Widget> children) builder;
+  final Widget Function(BuildContext context, Map<String, Widget> children)
+      builder;
 
   final Map<String, Widget> children;
 
