@@ -1,10 +1,10 @@
 import 'dart:math' show pi;
 
 import 'package:flutter/material.dart';
-import 'package:movies/ui/movie_date_pick_sheet.dart';
-import 'package:provider/provider.dart';
 import 'package:movies/models/movie.dart';
+import 'package:movies/ui/movie_date_pick_sheet.dart';
 import 'package:movies/ui/page_notifier_view.dart';
+import 'package:provider/provider.dart';
 
 class HomePage extends StatefulWidget {
   static Route<dynamic> route() {
@@ -156,7 +156,7 @@ class _MoviePosterState extends State<MoviePoster> with TickerProviderStateMixin
                 builder: _rotatedImageBuilder,
                 child: GestureDetector(
                   onTap: () {
-                    MovieDatePickSheet.show(context, widget.index);
+                    MovieDateTimePickSheet.show(context, widget.index);
                   },
                   child: ClipRRect(borderRadius: BorderRadius.circular(40.0), child: value.poster),
                 ),

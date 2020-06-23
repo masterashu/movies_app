@@ -3,18 +3,20 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:movies/models/movie.dart';
 import 'package:movies/ui/showtime_picker.dart';
+import 'package:movies/ui/transitions.dart';
 import 'package:movies/ui/week_date_picker.dart';
 import 'package:provider/provider.dart';
 
-class MovieDatePickSheet extends StatefulWidget {
+class MovieDateTimePickSheet extends StatefulWidget {
   final index;
+
   static show(BuildContext context, int index) {
     showModalBottomSheet(
       context: context,
       builder: (context) {
         return ListenableProvider.value(
           value: Provider.of<Movies>(context),
-          child: MovieDatePickSheet(index),
+          child: MovieDateTimePickSheet(index),
         );
       },
       backgroundColor: Colors.white,
@@ -31,15 +33,18 @@ class MovieDatePickSheet extends StatefulWidget {
     );
   }
 
-  MovieDatePickSheet(this.index);
+  MovieDateTimePickSheet(this.index);
 
   @override
-  _MovieDatePickSheetState createState() => _MovieDatePickSheetState();
+  _MovieDateTimePickSheetState createState() => _MovieDateTimePickSheetState();
 }
 
-class _MovieDatePickSheetState extends State<MovieDatePickSheet> with TickerProviderStateMixin {
+class _MovieDateTimePickSheetState extends State<MovieDateTimePickSheet>
+    with TickerProviderStateMixin {
   AnimationController _controller;
+
   Movie get movie => Provider.of<Movies>(context)[widget.index];
+
   Movie get movieNL => Provider.of<Movies>(context, listen: false)[widget.index];
 
   var selectedDate;
@@ -81,9 +86,25 @@ class _MovieDatePickSheetState extends State<MovieDatePickSheet> with TickerProv
             ),
             Container(
               height: 160,
-              child: AnimatedBuilder(
+              child: AnimatedChildrenBuilder(
                 animation: _controller,
                 builder: _slidingPosterDetailsBuilder,
+                children: [
+                  ClipRRect(
+                    child: Image(image: movie.poster.image, width: 105, height: 140),
+                    borderRadius: BorderRadius.circular(20.0),
+                  ),
+                  Text(movie.name, style: titleStyle),
+                  Text.rich(
+                    TextSpan(text: '${movie.genres}    ${movie.duration}', style: descriptionStyle),
+                  ),
+                  Text('IMDb: ${movie.imdb}\n', style: descriptionStyle),
+                  Text(
+                    movie.description,
+                    style: descriptionStyle,
+                    overflow: TextOverflow.fade,
+                  ),
+                ],
               ),
             ),
             // Week Date Picker
@@ -116,9 +137,7 @@ class _MovieDatePickSheetState extends State<MovieDatePickSheet> with TickerProv
     super.dispose();
   }
 
-  Widget _slidingPosterDetailsBuilder(context, child) {
-    var posterThumb = Image(image: movie.poster.image, width: 105, height: 140);
-
+  Widget _slidingPosterDetailsBuilder(context, List<Widget> children) {
     var detailTween = Tween<Offset>(begin: Offset(300, 0), end: Offset.zero);
     var curve = ElasticOutCurve(0.5);
 
@@ -143,31 +162,14 @@ class _MovieDatePickSheetState extends State<MovieDatePickSheet> with TickerProv
           right: 0,
           child: Container(
             width: MediaQuery.of(context).size.width - 180,
-            padding: EdgeInsets.only(left: 8.0),
+            padding: const EdgeInsets.only(left: 8.0),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                Transform.translate(
-                  offset: headingOffset.value,
-                  child: Text(movie.name, style: titleStyle),
-                ),
-                Transform.translate(
-                  offset: detailOffset.value,
-                  child: Text.rich(
-                    TextSpan(text: '${movie.genres}    ${movie.duration}', style: descriptionStyle),
-                  ),
-                ),
-                Transform.translate(
-                    offset: detail2Offset.value,
-                    child: Text('IMDb: ${movie.imdb}\n', style: descriptionStyle)),
-                Transform.translate(
-                  offset: descriptionOffset.value,
-                  child: Text(
-                    movie.description,
-                    style: descriptionStyle,
-                    overflow: TextOverflow.fade,
-                  ),
-                ),
+                Transform.translate(offset: headingOffset.value, child: children[1]),
+                Transform.translate(offset: detailOffset.value, child: children[2]),
+                Transform.translate(offset: detail2Offset.value, child: children[3]),
+                Transform.translate(offset: descriptionOffset.value, child: children[4]),
               ],
               crossAxisAlignment: CrossAxisAlignment.start,
             ),
@@ -175,13 +177,7 @@ class _MovieDatePickSheetState extends State<MovieDatePickSheet> with TickerProv
         ),
         Positioned(
           left: 0,
-          child: Transform.translate(
-            offset: posterOffset.value,
-            child: ClipRRect(
-              child: posterThumb,
-              borderRadius: BorderRadius.circular(20.0),
-            ),
-          ),
+          child: Transform.translate(offset: posterOffset.value, child: children[0]),
         ),
       ],
     );

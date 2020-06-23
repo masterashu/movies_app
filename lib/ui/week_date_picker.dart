@@ -39,12 +39,10 @@ class _WeekDatePickerState extends State<WeekDatePicker> with TickerProviderStat
           AnimatedBuilder(
             animation: widget.controller,
             builder: (context, child) {
-              return Opacity(
-                opacity: Tween<double>(begin: 0.0, end: 1.0)
-                    .animate(CurvedAnimation(
-                        curve: Interval(0.72, 0.94, curve: Curves.easeInOut),
-                        parent: widget.controller))
-                    .value,
+              return FadeTransition(
+                opacity: Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(
+                    curve: Interval(0.72, 0.94, curve: Curves.easeInOut),
+                    parent: widget.controller)),
                 child: child,
               );
             },
@@ -83,8 +81,8 @@ class _WeekDatePickerState extends State<WeekDatePicker> with TickerProviderStat
                         parent: widget.controller,
                       ));
 
-                      return Opacity(
-                        opacity: opacity.value,
+                      return FadeTransition(
+                        opacity: opacity,
                         child: Transform.scale(scale: scale.value, child: child),
                       );
                     },
