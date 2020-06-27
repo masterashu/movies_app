@@ -2,6 +2,8 @@
 
 A new Flutter application.
 
+Project Insipered by the design created by [Richard](https://www.instagram.com/richardbusato).
+
 ## Getting Started
 
 This project is a starting point for a Flutter application.
